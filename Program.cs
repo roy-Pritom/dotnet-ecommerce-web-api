@@ -78,6 +78,46 @@ app.MapPost("/api/categories", () =>
     return Results.Created($"/api/categories/{newCategory.Id}", newCategory);
 });
 
+app.MapGet("/api/categories/{id}", (Guid id) =>
+{
+
+    var foundCategory = categories.FirstOrDefault(c => c.Id == id);
+    if (foundCategory == null)
+    {
+        return Results.NotFound("Category not found");
+    }
+    return Results.Ok(foundCategory);
+});
+
+app.MapDelete("/api/categories/{id}", (Guid id) =>
+{
+    var foundCategory = categories.FirstOrDefault(c => c.Id == id);
+    if (foundCategory == null)
+    {
+        return Results.NotFound("Category Which you are trying to delete is not found");
+    }
+    categories.Remove(foundCategory);
+    return Results.NoContent();
+});
+
+
+app.MapPut("/api/categories/{id}", (Guid id, Category updatedCategory) =>
+{
+    var foundCategory = categories.FirstOrDefault(c => c.Id == id);
+    if (foundCategory == null)
+    {
+        return Results.NotFound("Category not found");
+    }
+
+    // Update the properties of the found category
+    foundCategory.Name = updatedCategory.Name;
+    foundCategory.Description = updatedCategory.Description;
+    foundCategory.ImageUrl = updatedCategory.ImageUrl;
+
+
+    return Results.Ok(foundCategory);
+});
+
 
 
 
