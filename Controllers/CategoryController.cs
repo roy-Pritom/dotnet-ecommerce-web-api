@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Ecommerce_Web_Api.Common.Responses;
 using Ecommerce_Web_Api.DTOs;
 using Ecommerce_Web_Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ namespace Ecommerce_Web_Api.Controllers
                 UpdatedAt = c.UpdatedAt
             }).ToList();
 
-            return Ok(categoryList);
+            return Ok(ApiResponse<List<CategoryReadDto>>.SuccessResponse(categoryList, StatusCodes.Status200OK, "Categories retrieved successfully."));
         }
 
 
@@ -55,7 +56,7 @@ namespace Ecommerce_Web_Api.Controllers
 
             categories.Add(newCategory);
 
-            var createdCategoryDto = new CategoryReadDto
+            var categoryReadDto = new CategoryReadDto
             {
                 Id = newCategory.Id,
                 Name = newCategory.Name,
@@ -66,7 +67,7 @@ namespace Ecommerce_Web_Api.Controllers
                 UpdatedAt = newCategory.UpdatedAt
             };
 
-            return Created($"/api/categories/{newCategory.Id}", createdCategoryDto);
+            return Created($"/api/categories/{newCategory.Id}", ApiResponse<CategoryReadDto>.SuccessResponse(categoryReadDto, StatusCodes.Status201Created, "Category created successfully."));
         }
 
 
@@ -76,7 +77,8 @@ namespace Ecommerce_Web_Api.Controllers
             var foundCategory = categories.FirstOrDefault(c => c.Id == id);
             if (foundCategory == null)
             {
-                return NotFound("Category not found");
+                return NotFound(ApiResponse<object>.ErrorResponse(new List<string> { $"Category with ID {id} not found." }, StatusCodes.Status404NotFound, "Validation failed."));
+
             }
             var categoryDto = new CategoryReadDto
             {
@@ -88,7 +90,7 @@ namespace Ecommerce_Web_Api.Controllers
                 CreatedAt = foundCategory.CreatedAt,
                 UpdatedAt = foundCategory.UpdatedAt
             };
-            return Ok(categoryDto);
+            return Ok(ApiResponse<CategoryReadDto>.SuccessResponse(categoryDto, StatusCodes.Status200OK, "Category retrieved successfully."));
         }
 
         [HttpDelete("{id:guid}")]
@@ -97,10 +99,11 @@ namespace Ecommerce_Web_Api.Controllers
             var foundCategory = categories.FirstOrDefault(c => c.Id == id);
             if (foundCategory == null)
             {
-                return NotFound("Category Which you are trying to delete is not found");
+                return NotFound(ApiResponse<object>.ErrorResponse(new List<string> { $"Category with ID {id} not found." }, StatusCodes.Status404NotFound, "Validation failed."));
             }
             categories.Remove(foundCategory);
-            return NoContent();
+            // return NoContent();
+            return Ok(ApiResponse<object>.SuccessResponse(null, StatusCodes.Status204NoContent, "Category deleted successfully."));
         }
 
         [HttpPut("{id:guid}")]
@@ -109,20 +112,27 @@ namespace Ecommerce_Web_Api.Controllers
             var foundCategory = categories.FirstOrDefault(c => c.Id == id);
             if (foundCategory == null)
             {
-                return NotFound("Category not found");
-            }
-            if (updatedCategory == null)
-            {
-                return BadRequest("Invalid category data");
+                return NotFound(ApiResponse<object>.ErrorResponse(new List<string> { $"Category with ID {id} not found." }, StatusCodes.Status404NotFound, "Validation failed."));
             }
 
             // Update the properties of the found category
             foundCategory.Name = updatedCategory.Name ?? foundCategory.Name;
             foundCategory.Description = updatedCategory.Description ?? foundCategory.Description;
             foundCategory.ImageUrl = updatedCategory.ImageUrl ?? foundCategory.ImageUrl;
+            foundCategory.UpdatedAt = DateTime.UtcNow;
 
+            var categoryReadDto = new CategoryReadDto
+            {
+                Id = foundCategory.Id,
+                Name = foundCategory.Name,
+                Description = foundCategory.Description ?? string.Empty,
+                ImageUrl = foundCategory.ImageUrl,
+                IsDeleted = foundCategory.IsDeleted,
+                CreatedAt = foundCategory.CreatedAt,
+                UpdatedAt = foundCategory.UpdatedAt
+            };
 
-            return Ok(foundCategory);
+            return Ok(ApiResponse<CategoryReadDto>.SuccessResponse(categoryReadDto, StatusCodes.Status200OK, "Category updated successfully."));
         }
     }
 }

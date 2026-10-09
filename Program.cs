@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Ecommerce_Web_Api.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,22 +16,19 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
+        // var errors = context.ModelState
+        //     .Where(e => e.Value != null && e.Value.Errors.Count > 0)
+        //     .Select(e => new
+        //     {
+        //         Field = e.Key,
+        //         Errors = e.Value != null ? e.Value.Errors.Select(er => er.ErrorMessage).ToArray() : new string[0]
+        //     }).ToArray();
+
         var errors = context.ModelState
-            .Where(e => e.Value != null && e.Value.Errors.Count > 0)
-            .Select(e => new
-            {
-                Field = e.Key,
-                Errors = e.Value != null ? e.Value.Errors.Select(er => er.ErrorMessage).ToArray() : new string[0]
-            }).ToArray();
+        .Where(e => e.Value != null && e.Value.Errors.Count > 0)
+        .SelectMany(e => e.Value?.Errors != null ? e.Value.Errors.Select(er => er.ErrorMessage) : new List<string>()).ToList();
 
-        var errorResponse = new
-        {
-            Success = false,
-            Message = "Validation errors occurred.",
-            Errors = errors,
-        };
-
-        return new BadRequestObjectResult(errorResponse);
+        return new BadRequestObjectResult(ApiResponse<object>.ErrorResponse(errors, StatusCodes.Status400BadRequest, "Validation errors occurred."));
     };
 });
 
