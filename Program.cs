@@ -59,88 +59,6 @@ app.MapGet("/", () =>
 //     return Results.NoContent(); //204
 // });// testing purpose
 
-List<Category> categories = new List<Category>();
-
-
-app.MapGet("/api/categories", ([FromQuery] string? searchTerm) =>
-{
-    Console.WriteLine($"Search term received: {searchTerm}");
-
-
-    var searchedCategories = categories.Where(c => !string.IsNullOrEmpty(c.Name) && c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-    return Results.Ok(searchedCategories);
-
-});
-
-
-app.MapPost("/api/categories", ([FromBody] Category categoryData) =>
-{
-
-    Console.WriteLine($"Received category data: {categoryData}");
-
-    if (!string.IsNullOrEmpty(categoryData.Name))
-    {
-        return Results.BadRequest("Category name is required");
-    }
-
-    var newCategory = new Category
-    {
-        Name = categoryData.Name,
-        Description = categoryData.Description,
-        ImageUrl = categoryData.ImageUrl
-    };
-
-    categories.Add(newCategory);
-
-    return Results.Created($"/api/categories/{newCategory.Id}", newCategory);
-
-
-
-});
-
-app.MapGet("/api/categories/{id:guid}", (Guid id) =>
-{
-
-    var foundCategory = categories.FirstOrDefault(c => c.Id == id);
-    if (foundCategory == null)
-    {
-        return Results.NotFound("Category not found");
-    }
-    return Results.Ok(foundCategory);
-});
-
-app.MapDelete("/api/categories/{id:guid}", (Guid id) =>
-{
-    var foundCategory = categories.FirstOrDefault(c => c.Id == id);
-    if (foundCategory == null)
-    {
-        return Results.NotFound("Category Which you are trying to delete is not found");
-    }
-    categories.Remove(foundCategory);
-    return Results.NoContent();
-});
-
-
-app.MapPut("/api/categories/{id:guid}", (Guid id, [FromBody] Category updatedCategory) =>
-{
-    var foundCategory = categories.FirstOrDefault(c => c.Id == id);
-    if (foundCategory == null)
-    {
-        return Results.NotFound("Category not found");
-    }
-    if (updatedCategory == null)
-    {
-        return Results.BadRequest("Invalid category data");
-    }
-
-    // Update the properties of the found category
-    foundCategory.Name = updatedCategory.Name ?? foundCategory.Name;
-    foundCategory.Description = updatedCategory.Description ?? foundCategory.Description;
-    foundCategory.ImageUrl = updatedCategory.ImageUrl ?? foundCategory.ImageUrl;
-
-
-    return Results.Ok(foundCategory);
-});
 
 
 
@@ -148,21 +66,4 @@ app.MapPut("/api/categories/{id:guid}", (Guid id, [FromBody] Category updatedCat
 
 app.Run();
 
-
-public record Category
-{
-    public Guid Id { get; set; } = Guid.NewGuid();
-
-    [Required(ErrorMessage = "Category name is required")]
-    public required String Name { get; set; }
-
-    public String? Description { get; set; } = "This is a category description";
-
-    public String? ImageUrl { get; set; }
-
-    public bool IsDeleted { get; set; } = false;
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-}
 
