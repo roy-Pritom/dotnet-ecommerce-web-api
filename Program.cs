@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -59,26 +62,43 @@ app.MapGet("/", () =>
 List<Category> categories = new List<Category>();
 
 
-app.MapGet("/api/categories", () =>
+app.MapGet("/api/categories", ([FromQuery] string? searchTerm) =>
 {
-    return Results.Ok(categories);
+    Console.WriteLine($"Search term received: {searchTerm}");
+
+
+    var searchedCategories = categories.Where(c => !string.IsNullOrEmpty(c.Name) && c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+    return Results.Ok(searchedCategories);
+
 });
 
 
-app.MapPost("/api/categories", () =>
+app.MapPost("/api/categories", ([FromBody] Category categoryData) =>
 {
+
+    Console.WriteLine($"Received category data: {categoryData}");
+
+    if (!string.IsNullOrEmpty(categoryData.Name))
+    {
+        return Results.BadRequest("Category name is required");
+    }
+
     var newCategory = new Category
     {
-        Name = "Electronics",
-        Description = "This is a category description",
-        ImageUrl = "https://example.com/category-image.jpg"
+        Name = categoryData.Name,
+        Description = categoryData.Description,
+        ImageUrl = categoryData.ImageUrl
     };
+
     categories.Add(newCategory);
 
     return Results.Created($"/api/categories/{newCategory.Id}", newCategory);
+
+
+
 });
 
-app.MapGet("/api/categories/{id}", (Guid id) =>
+app.MapGet("/api/categories/{id:guid}", (Guid id) =>
 {
 
     var foundCategory = categories.FirstOrDefault(c => c.Id == id);
@@ -89,7 +109,7 @@ app.MapGet("/api/categories/{id}", (Guid id) =>
     return Results.Ok(foundCategory);
 });
 
-app.MapDelete("/api/categories/{id}", (Guid id) =>
+app.MapDelete("/api/categories/{id:guid}", (Guid id) =>
 {
     var foundCategory = categories.FirstOrDefault(c => c.Id == id);
     if (foundCategory == null)
@@ -101,18 +121,22 @@ app.MapDelete("/api/categories/{id}", (Guid id) =>
 });
 
 
-app.MapPut("/api/categories/{id}", (Guid id, Category updatedCategory) =>
+app.MapPut("/api/categories/{id:guid}", (Guid id, [FromBody] Category updatedCategory) =>
 {
     var foundCategory = categories.FirstOrDefault(c => c.Id == id);
     if (foundCategory == null)
     {
         return Results.NotFound("Category not found");
     }
+    if (updatedCategory == null)
+    {
+        return Results.BadRequest("Invalid category data");
+    }
 
     // Update the properties of the found category
-    foundCategory.Name = updatedCategory.Name;
-    foundCategory.Description = updatedCategory.Description;
-    foundCategory.ImageUrl = updatedCategory.ImageUrl;
+    foundCategory.Name = updatedCategory.Name ?? foundCategory.Name;
+    foundCategory.Description = updatedCategory.Description ?? foundCategory.Description;
+    foundCategory.ImageUrl = updatedCategory.ImageUrl ?? foundCategory.ImageUrl;
 
 
     return Results.Ok(foundCategory);
@@ -129,7 +153,8 @@ public record Category
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public String? Name { get; set; }
+    [Required(ErrorMessage = "Category name is required")]
+    public required String Name { get; set; }
 
     public String? Description { get; set; } = "This is a category description";
 
