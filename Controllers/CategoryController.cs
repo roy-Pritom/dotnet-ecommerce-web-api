@@ -1,34 +1,51 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Ecommerce_Web_Api.DTOs;
 using Ecommerce_Web_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_Web_Api.Controllers
 {
-    [Route("api/categories")]
+    [Route("api/categories/")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        List<Category> categories = new List<Category>();
+        private static List<Category> categories = new List<Category>();
 
 
         [HttpGet]
-        public IActionResult GetCategories([FromQuery] string searchTerm)
+        public IActionResult GetCategories([FromQuery] string searchTerm = "")
         {
-            var searchedCategories = categories.Where(c => !string.IsNullOrEmpty(c.Name) && c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            // var searchedCategories = categories.Where(c => !string.IsNullOrEmpty(c.Name) && c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            return Ok(searchedCategories);
+            // return Ok(searchedCategories);
+
+            var categoryList = categories.Select(c => new CategoryReadDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description ?? string.Empty,
+                ImageUrl = c.ImageUrl,
+                IsDeleted = c.IsDeleted,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt
+            }).ToList();
+
+            return Ok(categoryList);
         }
 
 
         [HttpPost]
-        public IActionResult CreateCategory([FromBody] Category categoryData)
+        public IActionResult CreateCategory([FromBody] CategoryCreateDto categoryData)
         {
-            Console.WriteLine($"Received category data: {categoryData}");
+            Console.WriteLine($"Received category data: {JsonSerializer.Serialize(categoryData, new JsonSerializerOptions { WriteIndented = true })}");
 
-            if (!string.IsNullOrEmpty(categoryData.Name))
+            // Console.WriteLine($"Category Name: {(string.IsNullOrEmpty(categoryData.Name) ? "null or empty" : categoryData.Name)}");
+
+            if (string.IsNullOrEmpty(categoryData.Name))
             {
                 return BadRequest("Category name is required");
             }
@@ -42,8 +59,18 @@ namespace Ecommerce_Web_Api.Controllers
 
             categories.Add(newCategory);
 
-            return Created($"/api/categories/{newCategory.Id}", newCategory);
+            var createdCategoryDto = new CategoryReadDto
+            {
+                Id = newCategory.Id,
+                Name = newCategory.Name,
+                Description = newCategory.Description ?? string.Empty,
+                ImageUrl = newCategory.ImageUrl,
+                IsDeleted = newCategory.IsDeleted,
+                CreatedAt = newCategory.CreatedAt,
+                UpdatedAt = newCategory.UpdatedAt
+            };
 
+            return Created($"/api/categories/{newCategory.Id}", createdCategoryDto);
         }
 
 
@@ -55,7 +82,17 @@ namespace Ecommerce_Web_Api.Controllers
             {
                 return NotFound("Category not found");
             }
-            return Ok(foundCategory);
+            var categoryDto = new CategoryReadDto
+            {
+                Id = foundCategory.Id,
+                Name = foundCategory.Name,
+                Description = foundCategory.Description ?? string.Empty,
+                ImageUrl = foundCategory.ImageUrl,
+                IsDeleted = foundCategory.IsDeleted,
+                CreatedAt = foundCategory.CreatedAt,
+                UpdatedAt = foundCategory.UpdatedAt
+            };
+            return Ok(categoryDto);
         }
 
         [HttpDelete("{id:guid}")]
@@ -71,7 +108,7 @@ namespace Ecommerce_Web_Api.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public IActionResult UpdateCategory(Guid id, [FromBody] Category updatedCategory)
+        public IActionResult UpdateCategory(Guid id, [FromBody] CategoryUpdateDto updatedCategory)
         {
             var foundCategory = categories.FirstOrDefault(c => c.Id == id);
             if (foundCategory == null)
