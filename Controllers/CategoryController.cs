@@ -41,14 +41,10 @@ namespace Ecommerce_Web_Api.Controllers
         [HttpPost]
         public IActionResult CreateCategory([FromBody] CategoryCreateDto categoryData)
         {
-            Console.WriteLine($"Received category data: {JsonSerializer.Serialize(categoryData, new JsonSerializerOptions { WriteIndented = true })}");
+            // Console.WriteLine($"Received category data: {JsonSerializer.Serialize(categoryData, new JsonSerializerOptions { WriteIndented = true })}");
 
             // Console.WriteLine($"Category Name: {(string.IsNullOrEmpty(categoryData.Name) ? "null or empty" : categoryData.Name)}");
 
-            if (string.IsNullOrEmpty(categoryData.Name))
-            {
-                return BadRequest("Category name is required");
-            }
 
             var newCategory = new Category
             {

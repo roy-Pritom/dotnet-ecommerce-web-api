@@ -10,10 +10,10 @@ namespace Ecommerce_Web_Api.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Required(ErrorMessage = "Category name is required")]
+
         public required String Name { get; set; }
 
-        public String? Description { get; set; } = "This is a category description";
+        public String? Description { get; set; }
 
         public String? ImageUrl { get; set; }
 

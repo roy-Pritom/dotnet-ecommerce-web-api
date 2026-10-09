@@ -10,6 +10,31 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 
+// refactor api behavior for validation errors
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value != null && e.Value.Errors.Count > 0)
+            .Select(e => new
+            {
+                Field = e.Key,
+                Errors = e.Value != null ? e.Value.Errors.Select(er => er.ErrorMessage).ToArray() : new string[0]
+            }).ToArray();
+
+        var errorResponse = new
+        {
+            Success = false,
+            Message = "Validation errors occurred.",
+            Errors = errors,
+        };
+
+        return new BadRequestObjectResult(errorResponse);
+    };
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
