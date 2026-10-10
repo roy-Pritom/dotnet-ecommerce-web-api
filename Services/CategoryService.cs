@@ -63,7 +63,7 @@ namespace Ecommerce_Web_Api.Services
                 return null;
             }
 
-            foundCategory.Update(
+            foundCategory.Patch(
                 categoryUpdateDto.Name,
                 categoryUpdateDto.Description,
                 categoryUpdateDto.ImageUrl);

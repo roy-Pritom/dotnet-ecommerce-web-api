@@ -49,7 +49,7 @@ namespace Ecommerce_Web_Api.Controllers
         }
 
         // PUT replaces the whole category: all required fields must be sent
-        [HttpPut("{id:guid}")]
+        [HttpPatch("{id:guid}")]
         public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] CategoryUpdateDto categoryUpdateDto, CancellationToken cancellationToken)
         {
             var categoryReadDto = await _categoryService.UpdateCategory(id, categoryUpdateDto, cancellationToken);
