@@ -26,20 +26,19 @@ namespace Ecommerce_Web_Api.Services
         public async Task<List<CategoryReadDto>> GetAllCategories(CancellationToken cancellationToken = default)
         {
             // Read-only query: no tracking, and project straight to the DTO in SQL
-            return await _ecommerceWebApiDbContext.Categories
-                .AsNoTracking()
-                .OrderBy(c => c.Name)
-                .ProjectTo<CategoryReadDto>(_mapper.ConfigurationProvider)
-                .ToListAsync(cancellationToken);
+            var categories = await _ecommerceWebApiDbContext.Categories.ToListAsync(cancellationToken);
+            return _mapper.Map<List<CategoryReadDto>>(categories);
         }
 
         public async Task<CategoryReadDto?> GetCategoryById(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _ecommerceWebApiDbContext.Categories
-                .AsNoTracking()
-                .Where(c => c.Id == id)
-                .ProjectTo<CategoryReadDto>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync(cancellationToken);
+            var category = await _ecommerceWebApiDbContext.Categories.FindAsync([id], cancellationToken);
+            if (category == null)
+            {
+                return null;
+            }
+            return _mapper.Map<CategoryReadDto>(category);
+
         }
 
         public async Task<CategoryReadDto> CreateCategory(CategoryCreateDto categoryCreateDto, CancellationToken cancellationToken = default)
