@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Ecommerce_Web_Api.Common.Pagination;
 using Ecommerce_Web_Api.Common.Responses;
 using Ecommerce_Web_Api.DTOs;
 using Ecommerce_Web_Api.Interfaces;
@@ -21,10 +22,10 @@ namespace Ecommerce_Web_Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCategories(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCategories([FromQuery] PaginationQuery pagination, CancellationToken cancellationToken)
         {
-            var categoryList = await _categoryService.GetAllCategories(cancellationToken);
-            return Ok(ApiResponse<List<CategoryReadDto>>.SuccessResponse(categoryList, StatusCodes.Status200OK, "Categories retrieved successfully."));
+            var categoryList = await _categoryService.GetAllCategories(pagination, cancellationToken);
+            return Ok(ApiResponse<PagedResult<CategoryReadDto>>.SuccessResponse(categoryList, StatusCodes.Status200OK, "Categories retrieved successfully."));
         }
 
         [HttpGet("{id:guid}")]

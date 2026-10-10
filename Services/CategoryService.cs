@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Ecommerce_Web_Api.Common.Extensions;
+using Ecommerce_Web_Api.Common.Pagination;
 using Ecommerce_Web_Api.Context;
 using Ecommerce_Web_Api.DTOs;
 using Ecommerce_Web_Api.Interfaces;
@@ -23,11 +25,16 @@ namespace Ecommerce_Web_Api.Services
             _mapper = mapper;
         }
 
-        public async Task<List<CategoryReadDto>> GetAllCategories(CancellationToken cancellationToken = default)
+        public async Task<PagedResult<CategoryReadDto>> GetAllCategories(PaginationQuery pagination, CancellationToken cancellationToken = default)
         {
-            // Read-only query: no tracking, and project straight to the DTO in SQL
-            var categories = await _ecommerceWebApiDbContext.Categories.ToListAsync(cancellationToken);
-            return _mapper.Map<List<CategoryReadDto>>(categories);
+            // Read-only query: no tracking, and project straight to the DTO in SQL.
+            // Id is a tie-breaker so rows with the same CreatedAt keep a stable order across pages.
+            return await _ecommerceWebApiDbContext.Categories
+                .AsNoTracking()
+                .OrderByDescending(c => c.CreatedAt)
+                .ThenBy(c => c.Id)
+                .ProjectTo<CategoryReadDto>(_mapper.ConfigurationProvider)
+                .ToPagedResultAsync(pagination, cancellationToken);
         }
 
         public async Task<CategoryReadDto?> GetCategoryById(Guid id, CancellationToken cancellationToken = default)
