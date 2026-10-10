@@ -1,15 +1,18 @@
 using System.ComponentModel.DataAnnotations;
 using Ecommerce_Web_Api.Common.Responses;
+using Ecommerce_Web_Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddOpenApi();
 
+
+builder.Services.AddSingleton<CategoryService>();
 builder.Services.AddControllers();
+
 
 // refactor api behavior for validation errors
 builder.Services.Configure<ApiBehaviorOptions>(options =>
