@@ -3,20 +3,23 @@ using Ecommerce_Web_Api.Common.Responses;
 using Ecommerce_Web_Api.Services;
 using Ecommerce_Web_Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Ecommerce_Web_Api.Context;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program));
-
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddOpenApi();
-
-
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddControllers();
 
+
+
+// Db Connection register
+builder.Services.AddDbContext<EcommerceWebApiDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddControllers();
 
 // refactor api behavior for validation errors
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -38,6 +41,10 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         return new BadRequestObjectResult(ApiResponse<object>.ErrorResponse(errors, StatusCodes.Status400BadRequest, "Validation errors occurred."));
     };
 });
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 
 var app = builder.Build();
