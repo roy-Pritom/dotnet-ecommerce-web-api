@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Ecommerce_Web_Api.Common.Responses;
 using Ecommerce_Web_Api.Services;
+using Ecommerce_Web_Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +11,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 
 
-builder.Services.AddSingleton<CategoryService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddControllers();
 
 

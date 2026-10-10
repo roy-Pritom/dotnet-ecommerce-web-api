@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <!-- for Swagger  -->
+
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.0" />
 

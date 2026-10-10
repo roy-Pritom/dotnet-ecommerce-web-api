@@ -4,11 +4,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Ecommerce_Web_Api.DTOs;
+using Ecommerce_Web_Api.Interfaces;
 using Ecommerce_Web_Api.Models;
 
 namespace Ecommerce_Web_Api.Services
 {
-    public class CategoryService
+    public class CategoryService : ICategoryService
     {
 
         private static readonly List<Category> _categories = new List<Category>();

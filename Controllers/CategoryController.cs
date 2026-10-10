@@ -5,8 +5,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Ecommerce_Web_Api.Common.Responses;
 using Ecommerce_Web_Api.DTOs;
+using Ecommerce_Web_Api.Interfaces;
 using Ecommerce_Web_Api.Models;
-using Ecommerce_Web_Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_Web_Api.Controllers
@@ -16,9 +16,9 @@ namespace Ecommerce_Web_Api.Controllers
     public class CategoryController : ControllerBase
     {
 
-        private readonly CategoryService _categoryService;
+        private readonly ICategoryService _categoryService;
 
-        public CategoryController(CategoryService categoryService)
+        public CategoryController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
