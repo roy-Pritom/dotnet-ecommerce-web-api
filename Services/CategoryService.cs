@@ -13,47 +13,32 @@ namespace Ecommerce_Web_Api.Services
     {
 
         private static readonly List<Category> _categories = new List<Category>();
+        private readonly AutoMapper.IMapper _mapper;
 
+        public CategoryService(AutoMapper.IMapper mapper)
+        {
+            _mapper = mapper;
+        }
 
         public List<CategoryReadDto> GetAllCategories()
         {
-            var categoryList = _categories.Select(c => new CategoryReadDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Description = c.Description ?? string.Empty,
-                ImageUrl = c.ImageUrl,
-                IsDeleted = c.IsDeleted,
-                CreatedAt = c.CreatedAt,
-                UpdatedAt = c.UpdatedAt
-            }).ToList();
-
+            var categoryList = _mapper.Map<List<CategoryReadDto>>(_categories);
             return categoryList;
         }
 
 
         public CategoryReadDto CreateCategory(CategoryCreateDto categoryCreateDto)
         {
-            var newCategory = new Category
-            {
-                Name = categoryCreateDto.Name,
-                Description = categoryCreateDto.Description,
-                ImageUrl = categoryCreateDto.ImageUrl
-            };
-
+            // var newCategory = new Category
+            // {
+            //     Name = categoryCreateDto.Name,
+            //     Description = categoryCreateDto.Description,
+            //     ImageUrl = categoryCreateDto.ImageUrl
+            // };
+            var newCategory = _mapper.Map<Category>(categoryCreateDto);
             _categories.Add(newCategory);
 
-            var categoryReadDto = new CategoryReadDto
-            {
-                Id = newCategory.Id,
-                Name = newCategory.Name,
-                Description = newCategory.Description ?? string.Empty,
-                ImageUrl = newCategory.ImageUrl,
-                IsDeleted = newCategory.IsDeleted,
-                CreatedAt = newCategory.CreatedAt,
-                UpdatedAt = newCategory.UpdatedAt
-            };
-            return categoryReadDto;
+            return _mapper.Map<CategoryReadDto>(newCategory);
 
         }
 
@@ -65,16 +50,7 @@ namespace Ecommerce_Web_Api.Services
             {
                 return null;
             }
-            var categoryDto = new CategoryReadDto
-            {
-                Id = foundCategory.Id,
-                Name = foundCategory.Name,
-                Description = foundCategory.Description ?? string.Empty,
-                ImageUrl = foundCategory.ImageUrl,
-                IsDeleted = foundCategory.IsDeleted,
-                CreatedAt = foundCategory.CreatedAt,
-                UpdatedAt = foundCategory.UpdatedAt
-            };
+            var categoryDto = _mapper.Map<CategoryReadDto>(foundCategory);
             return categoryDto;
         }
 
@@ -100,21 +76,13 @@ namespace Ecommerce_Web_Api.Services
             }
 
             // Update the properties of the found category
-            foundCategory.Name = categoryUpdateDto.Name ?? foundCategory.Name;
-            foundCategory.Description = categoryUpdateDto.Description ?? foundCategory.Description;
-            foundCategory.ImageUrl = categoryUpdateDto.ImageUrl ?? foundCategory.ImageUrl;
-            foundCategory.UpdatedAt = DateTime.UtcNow;
+            // foundCategory.Name = categoryUpdateDto.Name ?? foundCategory.Name;
+            // foundCategory.Description = categoryUpdateDto.Description ?? foundCategory.Description;
+            // foundCategory.ImageUrl = categoryUpdateDto.ImageUrl ?? foundCategory.ImageUrl;
 
-            return new CategoryReadDto
-            {
-                Id = foundCategory.Id,
-                Name = foundCategory.Name,
-                Description = foundCategory.Description ?? string.Empty,
-                ImageUrl = foundCategory.ImageUrl,
-                IsDeleted = foundCategory.IsDeleted,
-                CreatedAt = foundCategory.CreatedAt,
-                UpdatedAt = foundCategory.UpdatedAt
-            };
+            _mapper.Map(categoryUpdateDto, foundCategory);
+
+            return _mapper.Map<CategoryReadDto>(foundCategory);
         }
 
 
